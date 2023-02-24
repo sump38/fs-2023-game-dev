@@ -1,29 +1,74 @@
 window.onload = () => {
-
-
   /** @type {HTMLCanvasElement} */
   const myCanvas = document.getElementById('gameCanvas');
   const ctx = myCanvas.getContext('2d');
-  // ctx.strokeRect(100, 100, 50, 50);
-  // ctx.clearRect(0,0,640,480);
-  // ctx.fillRect(100, 300, 200, 100);
-  // ctx.fillText('Hello canvas', 20, 20);
+  const gameObjects = [];
+  
 
-  let x = 0;
+  gameObjects.push(new GameObject(40, 40));
 
   window.setInterval(() => {
     ctx.clearRect(0,0,640,480);
-    ctx.strokeRect(x, 100, 40, 40);
-    if(x >= 600) {
-      x = 0;
-    } else {
-      x+=2;
-    }
-  }, 17);
+    gameObjects.forEach(obj => {
+      obj.move();
+      obj.render(ctx);
+    });
 
+
+
+    // x = x + speed;
+
+  }, 17);
+}
+
+class GameObject {
+  constructor(width, height, speed = 0) {
+    this.x = 0;
+    this.y = 0;
+    this.width = width;
+    this.height = height;
+    this.speed = speed;
+
+    window.addEventListener('keydown', (event) => {
+      switch(event.code) {
+        case ('ArrowRight'): {
+          this.speed = 5;
+          break;
+        }
+        case ('ArrowLeft'): {
+          this.speed = -5;
+          break;
+        }
+        default: {
+          this.speed = 0;
+          break;
+        }
+      }
+      
+    });
+
+
+
+  }
+
+  render(ctx) {
+    ctx.fillRect(this.x, this.y, this.width, this.height);
+  }
+
+  move() {
+    this.x = this.x + this.speed;
+    // if(this.x >= 600 && this.speed > 0) {
+    //   this.speed = this.speed * -1;
+    // }
+    // if(this.x <= 0 && this.speed <= 0) {
+    //   this.speed = this.speed * -1;
+    // }
+  }
+
+  setSpeed(newSpeed) {
+    this.speed = newSpeed;
+  }
 
 
 
 }
-
-console.log('script started');
