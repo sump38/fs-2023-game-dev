@@ -3,14 +3,25 @@ window.onload = () => {
   const myCanvas = document.getElementById('gameCanvas');
   const ctx = myCanvas.getContext('2d');
   const gameObjects = [];
+
+  const keyboardController = new Controller();
+
+
+  const player = new Spaceship(50,50, keyboardController);
   
 
-  gameObjects.push(new Spaceship());
+  gameObjects.push(player);
+
+  window.setInterval(() => {
+    keyboardController.update();
+  },50);
+
+
 
   window.setInterval(() => {
     ctx.clearRect(0,0,640,480);
     gameObjects.forEach(obj => {
-      obj.move();
+      obj.update();
       obj.render(ctx);
     });
   }, 17);
@@ -22,40 +33,8 @@ class GameObject {
     this.width = width;
     this.height = height;
     this.speed = new Vector2D(0,0);
-
-    window.addEventListener('keydown', (event) => {
-      switch(event.code) {
-        case ('ArrowRight'): {
-          this.speed.x = 5;
-          break;
-        }
-        case ('ArrowLeft'): {
-          this.speed.x = -5;
-          break;
-        }
-        case ('ArrowUp'): {
-          this.speed.y = -5;
-          break;
-        }
-        case ('ArrowDown'): {
-          this.speed.y = 5;
-          break;
-        }
-        default: {
-          this.speed.x = 0;
-          this.speed.y = 0;
-          break;
-        }
-      }
-      
-    });
-
-    window.addEventListener('keyup', (event) => {
-      this.speed.x = 0;
-      this.speed.y = 0;
-    })
-
-
+    this.velocity = new Vector2D(0,0);
+    this.movespeed = 10;
 
   }
 
@@ -63,31 +42,57 @@ class GameObject {
     ctx.fillRect(this.position.x, this.position.y, this.width, this.height);
   }
 
-  move() {
-    this.position.x = this.position.x + this.speed.x;
-    this.position.y = this.position.y + this.speed.y;
-    // if(this.x >= 600 && this.speed > 0) {
-    //   this.speed = this.speed * -1;
-    // }
-    // if(this.x <= 0 && this.speed <= 0) {
-    //   this.speed = this.speed * -1;
-    // }
+  update() {
+    this.position.set(this.position.x + this.velocity.x, this.position.y + this.velocity.y);
   }
 
-  setSpeed(newSpeed) {
-    this.speed = newSpeed;
-  }
 }
 
 class Spaceship extends GameObject {
-  constructor() {
+  /**
+   * 
+   * @param {number} x x position
+   * @param {number} y y position
+   * @param {Controller} controller 
+   */  
+  constructor(x, y, controller) {
     super(64,64);
+
     this.image = new Image();
     this.image.src = './assets/ship/ship.png';
-    // this.image.onload = () => {
-    //   console.log('image loaded');
-    // }
+
+    this.position.set(x,y);
+    controller.register((controller) => {
+      this.handleIO(controller);
+    })
+
   }
+
+  /**
+   * 
+   * @param {Controller} c 
+   */
+  handleIO(c) {
+      this.velocity.set(0,0);
+
+      if(c.leftButton) {
+        this.velocity.x -= this.movespeed;
+      }
+      if(c.rightButton) {
+        this.velocity.x += this.movespeed;
+      }
+      if(c.upButton) {
+        this.velocity.y -= this.movespeed;
+      }
+      if(c.downButton) {
+        this.velocity.y += this.movespeed;
+      }
+  }
+
+
+
+
+
 
   /**
    * 
@@ -107,4 +112,97 @@ class Vector2D {
     this.x = x;
     this.y = y;
   }
+
+  set(x,y) {
+    this.x = x;
+    this.y = y;
+  }
+}
+
+class Controller {
+  constructor() {
+    this.upButton = false;
+    this.downButton = false;
+    this.leftButton = false;
+    this.rightButton = false;
+    this.actionOne = false;
+    this.actionTwo = false;
+
+
+    this.events = [];
+    
+    window.addEventListener('keydown', (event) => {
+      switch(event.code) {
+        case ('ArrowRight'): {
+          this.rightButton = true;
+          break;
+        }
+        case ('ArrowLeft'): {
+          this.leftButton = true;
+          break;
+        }
+        case ('ArrowUp'): {
+          this.upButton = true;
+          break;
+        }
+        case ('ArrowDown'): {
+          this.downButton = true;
+          break;
+        }
+        case ('ControlLeft'): {
+          this.actionOne = true;
+          break;
+        }
+        case ('Space'): {
+          this.actionTwo = true;
+        }
+        default: {
+          break;
+        }
+      }
+    });
+
+    window.addEventListener('keyup', (event) => {
+      switch(event.code) {
+        case ('ArrowRight'): {
+          this.rightButton = false;
+          break;
+        }
+        case ('ArrowLeft'): {
+          this.leftButton = false;
+          break;
+        }
+        case ('ArrowUp'): {
+          this.upButton = false;
+          break;
+        }
+        case ('ArrowDown'): {
+          this.downButton = false;
+          break;
+        }
+        case ('ControlLeft'): {
+          this.actionOne = false;
+          break;
+        }
+        case ('Space'): {
+          this.actionTwo = false;
+        }
+        default: {
+          break;
+        }
+      }
+    });
+  }
+
+  update() { 
+    this.events.forEach(event => {
+      event(this);
+    })
+  }
+
+  register(callback) {
+    this.events.push(callback);
+  }
+
+
 }
