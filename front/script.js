@@ -14,27 +14,33 @@ window.onload = () => {
 
   window.setInterval(() => {
     keyboardController.update();
-  },50);
+    gameObjects.forEach(obj => {
+      obj.update();
+    })
+  },17);
 
 
 
   window.setInterval(() => {
     ctx.clearRect(0,0,640,480);
+
     gameObjects.forEach(obj => {
-      obj.update();
       obj.render(ctx);
     });
+
+
   }, 17);
 }
 
 class GameObject {
-  constructor(width, height) {
+  constructor() {
     this.position = new Vector2D(0,0);
-    this.width = width;
-    this.height = height;
     this.speed = new Vector2D(0,0);
     this.velocity = new Vector2D(0,0);
     this.movespeed = 10;
+    this.rotationspeed = 0.1;
+    this.angle = 0;
+    this.torque = 0;
 
   }
 
@@ -44,6 +50,7 @@ class GameObject {
 
   update() {
     this.position.set(this.position.x + this.velocity.x, this.position.y + this.velocity.y);
+    this.angle = this.angle + this.torque;
   }
 
 }
@@ -56,10 +63,9 @@ class Spaceship extends GameObject {
    * @param {Controller} controller 
    */  
   constructor(x, y, controller) {
-    super(64,64);
+    super();
 
-    this.image = new Image();
-    this.image.src = './assets/ship/ship.png';
+    this.spaceshipImage = new Sprite2D('./assets/ship/ship3.png', 64,64);
 
     this.position.set(x,y);
     controller.register((controller) => {
@@ -74,12 +80,14 @@ class Spaceship extends GameObject {
    */
   handleIO(c) {
       this.velocity.set(0,0);
-
+      this.torque = 0;
       if(c.leftButton) {
-        this.velocity.x -= this.movespeed;
+        // this.velocity.x -= this.movespeed;
+        this.torque -= this.rotationspeed;
       }
       if(c.rightButton) {
-        this.velocity.x += this.movespeed;
+        // this.velocity.x += this.movespeed;
+        this.torque += this.rotationspeed;
       }
       if(c.upButton) {
         this.velocity.y -= this.movespeed;
@@ -87,6 +95,10 @@ class Spaceship extends GameObject {
       if(c.downButton) {
         this.velocity.y += this.movespeed;
       }
+  }
+
+  update() {
+    super.update();
   }
 
 
@@ -99,7 +111,7 @@ class Spaceship extends GameObject {
    * @param {CanvasRenderingContext2D} ctx 
    */
   render(ctx) {
-    ctx.drawImage(this.image, this.position.x, this.position.y);
+    this.spaceshipImage.render(ctx, this.position.x, this.position.y, this.angle);
   }
 
 
@@ -208,7 +220,26 @@ class Controller {
 }
 
 class Sprite2D {
-  constructor() {
-    
+  constructor(imageUrl, width, height) {
+    this.image = new Image(width, height);
+    this.image.src = imageUrl;
   }
+
+  /**
+   * 
+   * @param {CanvasRenderingContext2D} ctx 
+   */
+  render(ctx, x, y, angle = 0, scale = {x:1,y: 1}) {
+    
+    ctx.save();
+    ctx.translate(x,y);
+    ctx.rotate(angle);
+    ctx.scale(scale.x, scale.y);
+    ctx.drawImage(this.image, this.image.width/-2,this.image.height/-2);
+    ctx.restore();
+
+  }
+
+
+
 }
