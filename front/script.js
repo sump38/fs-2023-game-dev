@@ -206,3 +206,9 @@ class Controller {
 
 
 }
+
+class Sprite2D {
+  constructor() {
+    
+  }
+}
