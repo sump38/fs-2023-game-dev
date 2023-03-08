@@ -5,9 +5,13 @@ export default class Vector2D {
   }
 
   set(x,y) {
-    this.x = x;
-    this.y = y;
-
+    if(x instanceof Vector2D) {
+      this.x = x.x;
+      this.y = x.y;
+    } else {
+      this.x = x;
+      this.y = y;
+    }
     return this;
   }
 
@@ -19,7 +23,7 @@ export default class Vector2D {
     if(x instanceof Vector2D) {
       this.set(this.x + x.x, this.y + x.y);
     } else {
-      this.set(x,y);
+      this.set(this.x + x,this.y + y);
     }
     return this;
   }
@@ -30,8 +34,7 @@ export default class Vector2D {
   }
 
   multiply(value) {
-    this.set(this.x * value, this.y * value);
-    return this;
+    return this.set(this.x * value, this.y * value);
   }
 
   static dot(vectorA, vectorB) {
@@ -45,7 +48,7 @@ export default class Vector2D {
    * @param {Vector2D} vector 
    * @returns {Vector2D} normalized vector
    */
-  normalize(vector) {
+  normalize() {
     const magnitude = this.magnitude;
     return this.set(this.x/magnitude, this.y/magnitude);
   }

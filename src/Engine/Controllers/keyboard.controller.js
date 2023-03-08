@@ -79,7 +79,17 @@ export default class Controller {
     })
   }
 
-  register(callback) {
-    this.events.push(callback);
+  /**
+   * 
+   * @callback controllerCallback
+   * @param {Controller} c
+   * 
+   */
+
+  /**
+   * @param {controllerCallback} cb
+   */
+  register(cb) {
+    this.events.push(cb);
   }
 }
